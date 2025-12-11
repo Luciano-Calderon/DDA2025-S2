@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 //Funciones para organizar posiciones de n piedras en grilla nxn
  
@@ -36,7 +37,7 @@ int min_pasos_fila(int pair_of_positions[], int prime_number) { //Función Funci
 	}
 	
 	bubble_sort(columnas, prime_number); //se ordenan columnas
-	int mejor = 1000000000;
+	int mejor = INT_MAX;
 
 	for (int fila_obj = 1; fila_obj <= prime_number; fila_obj++) {
 		int costo_filas = 0;
@@ -80,7 +81,7 @@ int main(int argc, char* argv[]){
 	 */ 
 	 int valor;
 	 valor = min_pasos_fila(pair_of_positions, prime_number);
-	 printf("\n%d\n",valor);
+	 printf("\nLa cantidad mínima de pasos para formar una fila son: %d pasos\n",valor);
 
 	return 0;
 }
