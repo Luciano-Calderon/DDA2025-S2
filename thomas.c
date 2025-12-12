@@ -45,7 +45,7 @@ int min_pasos_fila(int pair_of_positions[], int prime_number) { //Función Funci
 
 		for (int k = 0; k < prime_number; k++) {
 			costo_filas += valor_absoluto(filas[k] - fila_obj);
-			costo_columnas += valor_absoluto(columnas[k] - k);
+			costo_columnas += valor_absoluto(columnas[k] - (k+1));
 		}
 
 		int total = costo_filas + costo_columnas;
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
 	for (int i=0; i<prime_number*2; i++){
 		int n;
 		fscanf(archivo,"%d",&n);
-		pair_of_positions[i] = n-1; //índices van originalmente del 1 al n, acá se convierte del 0 al n-1 para que encajen con las posiciones reales de un arreglo
+		pair_of_positions[i] = n; //índices van originalmente del 1 al n
 	}
 	printf("El orden de la cuadrilla es %dx%d\n",prime_number,prime_number);
 	int j=0;
