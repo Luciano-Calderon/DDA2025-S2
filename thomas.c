@@ -57,31 +57,48 @@ int min_pasos_fila(int pair_of_positions[], int prime_number) { //Función Funci
 
 	return mejor;
 	}
-int min_pasos_diagonal(int pair_positions[], int prime_number){
-	int* filas = (int*)malloc(prime_number*sizeof(int)); 
-	int* columnas = (int*)malloc(prime_number*sizeof(int));
-	int* diagonal = (int*)malloc(prime_number*sizeof(int));
+	
+void ordenar_por_columna(int pair_positions[], int n) {
+    //n es el número de piedras (pares)
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
 
-	//Separar filas y columnas
-	for (int k = 0; k < prime_number; k++) {
-		filas[k] = pair_of_positions[2*k];
-		columnas[k] = pair_of_positions[2*k + 1];
-		diagonal[k]= k; 
-	}
-	int costo_filas = 0;
-	int costo_columnas = 0;
+            int fila1 = pair_positions[2*j];          //fila del par j
+            int col1  = pair_positions[2*j + 1];      //columna del par j
 
-	for (int k = 0; k < prime_number; k++) {
-		costo_filas += valor_absoluto(filas[k] - diagonal[k]);
-		costo_columnas += valor_absoluto(columnas[k] - diagonal[k]);
-	}
+            int fila2 = pair_positions[2*(j+1)];      //fila del par j+1
+            int col2  = pair_positions[2*(j+1) + 1];  //columna del par j+1
 
-	int total = costo_filas + costo_columnas;
-	return total
+            // Ordenar por columna
+            if (col1 > col2 || (col1 == col2 && fila1 > fila2)) {
 
+                // Intercambiar pares completos
+                int tmp_f = fila1;
+                int tmp_c = col1;
+                pair_positions[2*j] = fila2;
+                pair_positions[2*j + 1] = col2;
+                pair_positions[2*(j+1)] = tmp_f;
+                pair_positions[2*(j+1) + 1] = tmp_c;
+            }
+        }
+    }
+}
 
-	}
+int min_pasos_diagonal_desc(int pair_positions[], int n) {
+    // Primero ordenamos las piedras por columna ascendente
+    ordenar_por_columna(pair_positions, n);
+    int costo_total = 0;
 
+    for (int k = 0; k < n; k++) {
+        int fila_actual = pair_positions[2*k];
+        int col_actual  = pair_positions[2*k + 1];
+
+        costo_total += abs(fila_actual - (k+1));
+        costo_total += abs(col_actual - (k+1));
+    }
+
+    return costo_total;
+}
 int main(int argc, char* argv[]){
 	//Extracción de Input
 	FILE* archivo = fopen(argv[1],"r");
@@ -103,9 +120,11 @@ int main(int argc, char* argv[]){
 	/*Hasta acá, se extraen los datos requeridos de la entrada txt, donde la 1ra línea es el tamaño n de la cuadrilla nxn,
 	 que además es la cantidad de n rocas, mientras que la 2da línea colecciona el par de posiciones de cada roca.
 	 */ 
-	 int valor;
+	 int valor, valor2;
 	 valor = min_pasos_fila(pair_of_positions, prime_number);
+	 valor2 = min_pasos_diagonal_desc(pair_of_positions, prime_number);
 	 printf("\nLa cantidad mínima de pasos para formar una fila son: %d pasos\n",valor);
+	 printf("\n Los pasos mínimos para realizar una diagonal descendente son: %d pasos \n", valor2);
 
 	return 0;
 }
