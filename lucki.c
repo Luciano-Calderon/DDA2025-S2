@@ -21,37 +21,53 @@ void ordenar(int arreglo[], int largo){
 	}
 }
 
-int min_pasos_columna(int pair_of_positions[], int prime_number){
+void ordenar_ambas(int arreglo1[], int arreglo2[], int largo){
+	for(int i=0; i<largo-1; i++){
+		for(int j=0; j<largo-1-i; j++){
+			if(arreglo1[j] > arreglo1[j+1]){
+				int aux = arreglo1[j];
+				arreglo1[j] = arreglo1[j+1];
+				arreglo1[j+1] = aux;
 
-	int* filas = (int*)malloc(prime_number*sizeof(int)); 
-	int* columnas = (int*)malloc(prime_number*sizeof(int));
+				aux = arreglo2[j];
+				arreglo2[j] = arreglo2[j+1];
+				arreglo2[j+1] = aux;
+			}
+		}	
+	}
+}
 
-	for (int k = 0; k < prime_number; k++) {
-		filas[k] = pair_of_positions[2*k];
-		columnas[k] = pair_of_positions[2*k + 1];
+int min_pasos_columna(int posiciones_en_pares[], int n){
+
+	int* filas = (int*)malloc(n*sizeof(int)); 
+	int* columnas = (int*)malloc(n*sizeof(int));
+
+	for (int k = 0; k < n; k++) {
+		filas[k] = posiciones_en_pares[2*k];
+		columnas[k] = posiciones_en_pares[2*k + 1];
 	}
 
 	//primero se deben ordenar los valores de posicion de fila de cada piedra de forma ascendente
 	//de esta forma se podrá calcular el costo de mover cada piedra de forma vertical, y luego asumir
 	//que hay una piedra por cada fila, simplificando el calculo de costo de las columnas
-	ordenar(filas, prime_number);
+	ordenar(filas, n);
 
 	//ahora se define un numero MAX como la menor cantidad de pasos, para ir reemplazandolos cuando
 	//se vaya encontrando otro valor menor
 	int menor = INT_MAX;
 
 	//se parte iterando
-	for(int columna = 1; columna <= prime_number; columna++){
+	for(int columna = 1; columna <= n; columna++){
 		int costo_columnas = 0;
 		int costo_filas = 0;
 
-		for(int piedra = 0; piedra < prime_number; piedra++){
+		for(int piedra = 0; piedra < n; piedra++){
 
-			//primero se calcula el costo de mover una piedra a una columna
-			//logrando que quede teoricamente una piedra por cada columna
+			//primero se calcula el costo de mover una piedra a una fila
+			//logrando que quede teoricamente una piedra por cada fila
 			costo_columnas += valor_absoluto(columnas[piedra] - columna);
 
-			//luego se calcula el costo de mover la piedra de esa columna a la fila en la que estamos
+			//luego se calcula el costo de mover la piedra de esa columna a la columna en la que estamos
 			costo_filas += valor_absoluto(filas[piedra] - (piedra + 1)); 
 		}
 
@@ -60,6 +76,48 @@ int min_pasos_columna(int pair_of_positions[], int prime_number){
 		}
 	}
 	return menor;
+}
+
+int min_pasos_diagonal_subida(int posiciones_en_pares[], int n){
+
+	int* filas = (int*)malloc(n*sizeof(int)); 
+	int* columnas = (int*)malloc(n*sizeof(int));
+
+	for (int k = 0; k < n; k++) {
+		filas[k] = posiciones_en_pares[2*k];
+		columnas[k] = posiciones_en_pares[2*k + 1];
+	}
+
+	ordenar_ambas(filas, columnas, n);
+	int menor = INT_MAX;
+
+	for(int columna = 1; columna <= n; columna++){
+		int costo_columnas = 0;
+		int costo_filas = 0;
+		
+		for(int piedra = 0; piedra < n; piedra++){
+			
+			//repito el proceso de ordenar, de forma teórica, una piedra por fila
+			//lo que me entrega la cantidad de movimeintos entre filas
+			costo_filas += valor_absoluto(columnas[piedra] - columna);
+			if(costo_filas > 0){
+				columnas[piedra] = columna;
+			}
+			
+			//luego se calcula el costo de mover la piedra de esa columna a la columna en la que estamos
+			for(int i = 0; i < n; i++){
+				if(filas[i] == piedra){
+					costo_columnas += valor_absoluto(columnas[i] - (piedra + 1)); 
+				}
+			}
+		}
+
+		if((costo_columnas + costo_filas) < menor){
+			menor = costo_columnas + costo_filas;
+		}
+	}
+	return menor;
+
 }
 
 
@@ -88,7 +146,8 @@ int main(int argc, char* argv[]){
 	 que además es la cantidad de n rocas, mientras que la 2da línea colecciona el par de posiciones de cada roca.
 	 */ 
 	
-	int min = min_pasos_columna(pair_of_positions, prime_number);
+	//int min = min_pasos_columna(pair_of_positions, prime_number);
+	int min = min_pasos_diagonal_subida(pair_of_positions, prime_number);
 	printf("\n%d\n", min);
 
 	return 0;
