@@ -198,43 +198,94 @@ int min_pasos_diagonal_ascendente(int posiciones_en_pares[], int n) {
     return menor;
 }
 
-/*     Main     */
+/*     Contadora de movimientos     */
 
-int main(int argc, char* argv[]){
-	//Extracción de Input
-	FILE* archivo = fopen(argv[1],"r");
-	int prime_number;
-	fscanf(archivo, "%d", &prime_number);
-	int* pair_of_positions = (int*)malloc(prime_number*2*sizeof(int));
-	for (int i=0; i<prime_number*2; i++){
-		int n;
-		fscanf(archivo,"%d",&n);
-		pair_of_positions[i] = n;
-	}
+int min_movimientos(int *pair_of_positions, int n){
 
-	/*Hasta acá, se extraen los datos requeridos de la entrada txt, donde la 1ra línea es el tamaño n de la cuadrilla nxn,
-	 que además es la cantidad de n rocas, mientras que la 2da línea colecciona el par de posiciones de cada roca.
-	*/ 
-	
-	//ahora se hará una busqueda para filas, columnas y diagonales y se determinará cual es menor
-	int min_f = min_pasos_fila(pair_of_positions, prime_number);
-	int min_c = min_pasos_columna(pair_of_positions, prime_number);
-	int min_da = min_pasos_diagonal_ascendente(pair_of_positions, prime_number);
-	int min_dd = min_pasos_diagonal_descendente(pair_of_positions, prime_number);
+    int min_f = min_pasos_fila(pair_of_positions, n);
+	int min_c = min_pasos_columna(pair_of_positions, n);
+	int min_da = min_pasos_diagonal_ascendente(pair_of_positions, n);
+	int min_dd = min_pasos_diagonal_descendente(pair_of_positions, n);
 
 	int min = min_f;
 
-	if(min_c < min_f){
-		min_f = min_c;
+	if(min_c < min){
+		min = min_c;
 	}
-	if(min_da < min_f){
-		min_f = min_da;
+	if(min_da < min){
+		min = min_da;
 	}
-	if(min_dd < min_f){
-		min_f = min_dd;
+	if(min_dd < min){
+		min = min_dd;
 	}
 
-	printf("%d\n", min_f);
-	
-	return 0;
+    return min;
+}
+
+/*     Main     */
+
+int main(int argc, char* argv[]){
+    
+    //asumo que el maximo de casos por entrada al inicio es 10
+    int max_casos = 10; 
+    int casos = 0;
+
+    int** arreglo_pair_of_positions = (int**)malloc(max_casos * sizeof(int*));
+    int* largo_casos = (int*)malloc(max_casos * sizeof(int));
+
+    //comienzo a leer y a guardar hasta llegar al 0
+    int dato;
+    while(scanf("%d", &dato) && dato != 0) {
+        
+        //reviso si se acabó el espacio por la cantidad de casos leídos
+        if (casos == max_casos) {
+
+            //en caso de que si se acabó, creo arreglos mas grandes
+            int max_casos_nuevo = max_casos * 2;
+            int** arreglo_posiciones_nuevo = (int**)malloc(max_casos_nuevo*sizeof(int*));
+            int* largo_casos_nuevo = (int*)malloc(max_casos_nuevo*sizeof(int));
+            
+            //ahora muevo todo a los nuevos arreglos
+            for(int i = 0; i < casos; i++){
+                arreglo_posiciones_nuevo[i] = arreglo_pair_of_positions[i];
+                largo_casos_nuevo[i] = largo_casos[i];
+            }
+            
+            //borro los arreglos antiguos
+            free(arreglo_pair_of_positions);
+            free(largo_casos);
+            
+            //redirijo los punteros
+            arreglo_pair_of_positions = arreglo_posiciones_nuevo;
+            largo_casos = largo_casos_nuevo;
+            max_casos = max_casos_nuevo;
+        }
+
+        largo_casos[casos] = dato;
+
+        //reservo memora para este "pair_of_positions"
+        arreglo_pair_of_positions[casos] = (int*)malloc(dato*2*sizeof(int));
+
+        //leo y guardo en el arreglo
+        for(int i = 0; i < dato * 2; i++) {
+            scanf("%d", &arreglo_pair_of_positions[casos][i]);
+        }
+
+        casos++;
+    }
+
+    //ahora se realiza el print de movimientos por cada caso
+    for(int i = 0; i < casos; i++) {
+        int movimientos = min_movimientos( arreglo_pair_of_positions[i], largo_casos[i]);
+        printf("%d\n", movimientos);
+    }
+
+    //por ultimo se liberaa el espacio de cada arreglo
+    for(int j = 0; j < casos; j++) {
+        free(arreglo_pair_of_positions[j]);
+    }
+    free(arreglo_pair_of_positions);
+    free(largo_casos);
+
+    return 0;
 }

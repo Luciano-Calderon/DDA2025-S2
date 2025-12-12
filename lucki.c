@@ -78,46 +78,96 @@ int min_pasos_columna(int posiciones_en_pares[], int n){
 	return menor;
 }
 
-int min_pasos_diagonal_subida(int posiciones_en_pares[], int n){
 
-	int* filas = (int*)malloc(n*sizeof(int)); 
-	int* columnas = (int*)malloc(n*sizeof(int));
+void funcion_recursiva_diagonal_descendente(int k, int costo_actual, int* menor, int posiciones[], int* usados, int n) {
+    //podamos los casos que no sirven
+    if (costo_actual >= *menor) return;
 
-	for (int k = 0; k < n; k++) {
-		filas[k] = posiciones_en_pares[2*k];
-		columnas[k] = posiciones_en_pares[2*k + 1];
-	}
+    //retorno si se revisan todas las piedras
+    if (k == n) {
+        if (costo_actual < *menor) {
+            *menor = costo_actual;
+        }
+        return;
+    }
 
-	ordenar_ambas(filas, columnas, n);
-	int menor = INT_MAX;
+    //como es la diagonal descendente, las posiciones cambian con k
+    int obj_f = k + 1;
+    int obj_c = k + 1;
 
-	for(int columna = 1; columna <= n; columna++){
-		int costo_columnas = 0;
-		int costo_filas = 0;
-		
-		for(int piedra = 0; piedra < n; piedra++){
-			
-			//repito el proceso de ordenar, de forma teórica, una piedra por fila
-			//lo que me entrega la cantidad de movimeintos entre filas
-			costo_filas += valor_absoluto(columnas[piedra] - columna);
-			if(costo_filas > 0){
-				columnas[piedra] = columna;
-			}
-			
-			//luego se calcula el costo de mover la piedra de esa columna a la columna en la que estamos
-			for(int i = 0; i < n; i++){
-				if(filas[i] == piedra){
-					costo_columnas += valor_absoluto(columnas[i] - (piedra + 1)); 
-				}
-			}
-		}
+    //calculo la distancia a todas las piedras disponibles
+    for (int i = 0; i < n; i++) {
+        if (usados[i] == 0) {
+            
+            int piedra_f = posiciones[2 * i];
+            int piedra_c = posiciones[2 * i + 1];
 
-		if((costo_columnas + costo_filas) < menor){
-			menor = costo_columnas + costo_filas;
-		}
-	}
-	return menor;
+            int distancia = valor_absoluto(piedra_f - obj_f) + valor_absoluto(piedra_c - obj_c);
 
+            usados[i] = 1;
+            funcion_recursiva_diagonal_descendente(k + 1, costo_actual + distancia, menor, posiciones, usados, n);
+            usados[i] = 0;
+        }
+    }   
+}
+
+int min_pasos_diagonal_descendente(int posiciones_en_pares[], int n) {
+    int* usados = (int*)malloc(n*sizeof(int));
+    for(int i = 0; i < n; i++){
+        usados[i] = 0; //marco que ninguna posicion ha sido usada
+    }
+
+    int menor = INT_MAX;
+
+    funcion_recursiva_diagonal_descendente(0, 0, &menor, posiciones_en_pares, usados, n);
+
+	free(usados);
+    return menor;
+}
+
+void funcion_recursiva_diagonal_ascendente(int k, int costo_actual, int* menor, int posiciones[], int* usados, int n) {
+
+    //repetimos los casos de corte
+    if (costo_actual >= *menor) return;
+
+    if (k == n) {
+        if (costo_actual < *menor) {
+            *menor = costo_actual;
+        }
+        return;
+    }
+
+    //en este caso solo la columna asciende en posicion, pero la fila desciende
+    int obj_f = n - k;
+    int obj_c = k + 1;
+
+    for (int i = 0; i < n; i++) {
+        if (usados[i] == 0) {
+
+            int piedra_f = posiciones[2 * i];
+            int piedra_c = posiciones[2 * i + 1];
+
+            int distancia = valor_absoluto(piedra_f - obj_f) + valor_absoluto(piedra_c - obj_c);
+
+            usados[i] = 1;
+            funcion_recursiva_diagonal_ascendente(k + 1, costo_actual + distancia, menor, posiciones, usados, n);
+            usados[i] = 0;
+        }
+    }
+}
+
+int min_pasos_diagonal_ascendente(int posiciones_en_pares[], int n) {
+    int* usados = (int*)malloc(n*sizeof(int));
+	for(int i = 0; i < n; i++){
+        usados[i] = 0;
+    }
+
+    int menor = INT_MAX;
+	
+    funcion_recursiva_diagonal_ascendente(0, 0, &menor, posiciones_en_pares, usados, n);
+	
+	free(usados);
+    return menor;
 }
 
 
